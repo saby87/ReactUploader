@@ -1,4 +1,3 @@
-// import logo from './logo.svg';
 import React, { useState } from 'react';
 import './App.css';
 import { Circles } from 'react-loader-spinner'
@@ -8,26 +7,27 @@ import { Circles } from 'react-loader-spinner'
 function App() {
 
   const [userId, setUserId] = useState('');
-  const [file, setFile] = useState();
+
   const [days, setDays] = useState(1);
-  const [uploadedFile, setUploadedFile] = useState();
-  const [error, setError] = useState();
   const [errorUserIDBlank, setErrorUserIDBlank] = useState(false);
   const [errorUploadFile, setErrorUploadFile] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-
-  const [files, setFiles] = useState(["asd"]);
-
   var fileData = []
 
-  const updateFieldChanged = index => e => {
+  const updateGpxChanged = index => e => {
     setErrorUploadFile(false)
     var newsdf = [...fileData]
     newsdf[index] = e.target.files[0]
     fileData = newsdf
     console.log("new ffile", fileData)
   }
-
+  const updatePdfChanged = index => e => {
+    setErrorUploadFile(false)
+    var newsdf = [...fileData]
+    newsdf[index] = e.target.files[0]
+    fileData = newsdf
+    console.log("new ffile", fileData)
+  }
   function handleChangeDays(event) {
     setDays(event.target.value);
   }
@@ -35,7 +35,6 @@ function App() {
     setErrorUserIDBlank(false)
     setUserId(event.target.value);
   }
-
   function handleSubmit(event) {
     event.preventDefault();
     if (userId.trim().length !== 0) {
@@ -51,25 +50,6 @@ function App() {
     }
 
   }
-
-  function checkFileNameStartWithPDFOrGPX(fileName) {
-    var strFirstThree = fileName.substring(0, 3);
-    if (strFirstThree.toUpperCase() === "PDF_" || strFirstThree.toUpperCase() == "GPX_") {
-
-      var charAtFourthIndex = fileName.substring(4, 5);
-      var numAtFourthIndex = parseInt(charAtFourthIndex, 10)
-      if (numAtFourthIndex) {
-
-        console.log("yes")
-      } else {
-        console.log("no")
-      }
-
-      return true
-    }
-    return false
-  }
-
   function uploadFilesToServer() {
     setShowLoader(true)
     var formdata = new FormData();
@@ -86,7 +66,7 @@ function App() {
 
     var stat = 0
     //http://api.theperfecttour.ch
-    fetch("/api/TMT/uploadTMTFiles?userId=b5f588df-60ca-4a69-960f-e926dcdb8015", requestOptions)
+    fetch("/api/TMT/uploadTMTFiles?userId=" + userId, requestOptions)
       .then(response => {
         console.log("response ", response)
         console.log("response status", response.status)
@@ -102,7 +82,7 @@ function App() {
 
       })
       .then(result => {
-        if (stat == 200) {
+        if (stat === 200) {
           alert("File uploaded successfully")
           console.log("result", result)
           window.location.reload(false);
@@ -117,14 +97,12 @@ function App() {
         setShowLoader(true)
       });
   }
-
   return (
-    
-    <div style={{ padding:20 ,margin: 20,border: '2px solid #FFB32D' }} >
-      <header >
+    <div style={{ padding: 20, margin: 20, border: '2px solid #FFB32D' }} >
+      {/* <header > */}
         <div>
-          <div className='header'> 
-            <img style={{borderRadius:50}}  height={100} width={100} src={require('./logo.jpeg')} />
+          <div className='header'>
+            <img alt='The Perfect Tour' style={{ borderRadius: 50 }} height={100} width={100} src={require('./logo.jpeg')} />
           </div>
           <h1 className='header'>Upload Tailor Made Tour</h1>
           <div className='linebreak'></div>
@@ -147,20 +125,43 @@ function App() {
             <text>Please keep file name as below format start with "GPX/PDF" then underscore then numberof day (1/2) undercsore again then name of file add underscore and then numberof day (1/2) </text>
           </div>
           <div style={{ margin: 10 }}>
-            <text><b>EX:</b>  GPX_1_MainGPX_1</text>
+            <text><b>EX:</b>  GPX_1_MainGPX_1 / PDF_1_MainPDF_1</text>
           </div>
 
           <form onSubmit={handleSubmit}>
             {errorUploadFile ? <text style={{ color: "red" }} >Please select files to Upload</text> : null}
-            {
-              Array.apply(null, { length: days }).map((e, i) => (
-                <div style={{ margin: 10 }}>
-                  <input type="file" onChange={updateFieldChanged(i)} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ justifyContent: "center", alignItems: "center", display: "flex" }}>
+                    <text> <b>PDF</b></text>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <div style={{ margin: 10 }}>
+                      <input type="file" onChange={updatePdfChanged(0)} />
+                    </div>
+                  </div>
+
                 </div>
-              ))
-            }
+                <div style={{ marginLeft: 20, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ justifyContent: "center", alignItems: "center", display: "flex" }}>
+                    <text> <b>GPX</b></text>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {
+                      Array.apply(null, { length: days }).map((e, i) => (
+                        <div style={{ margin: 10 }}>
+                          <input type="file" onChange={updateGpxChanged(i)} />
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {
-              days > 0 ? <button style={{ width: 200, height: 50, backgroundColor: '#FFB32D' }} type="submit">Upload</button> : null
+              days > 0 ? <div style={{ justifyContent: "center", alignItems: "center", display: "flex" }}><button style={{ elevation: 0, width: 200, height: 50, backgroundColor: '#FFB32D', borderRadius: 25 }} type="submit">Upload</button></div> : null
             }
 
           </form>
@@ -173,13 +174,13 @@ function App() {
             wrapperClass="header"
             visible={showLoader}
           />
-          {error && <p>Error uploading file: {error.message}</p>}
+
         </div>
 
 
-      </header>
+      {/* </header> */}
     </div>
-    
+
   );
 }
 
