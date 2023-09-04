@@ -51,3 +51,36 @@
     transform: rotate(360deg);
   }
 }
+
+
+.container {
+  display: flex; /* This makes the container a flex container */
+  justify-content: space-between; /* Items are spaced with equal space between them */
+  /* align-items: center; Align items vertically in the center */
+  
+  /* Add additional styles as needed */
+}
+
+.box {
+  flex: 1; /* This makes sure the boxes take equal space within the container */
+  padding: 20px;
+  
+  /* background-color: #f0f0f0;
+  border: 1px solid #ccc; */
+  
+  /* Add additional styles as needed */
+}
+
+/* Media Query for Responsive Views */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* Stack items vertically in small screens */
+    align-items: stretch; /* Stretch items to full container width */
+  }
+  
+  .box {
+    flex: none; /* Reset flex property to prevent equal width in small screens */
+    width: 100%; /* Take full width of the container in small screens */
+    margin-bottom: 10px; /* Add some spacing between boxes in small screens */
+  }
+}
