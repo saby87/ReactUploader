@@ -102,7 +102,8 @@ function App() {
     axios
       .post("http://api.theperfecttour.ch/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
+          "Content-Type": "multipart/form-data",
+          "Content-Security-Policy": "upgrade-insecure-requests"
         },
       })
       .then((response) => {
