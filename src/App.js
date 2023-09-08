@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from "axios";
 import './App.css';
 import { Circles } from 'react-loader-spinner'
 
@@ -15,24 +16,40 @@ function App() {
   const [errorUserIDBlank, setErrorUserIDBlank] = useState(false);
   const [errorUploadFile, setErrorUploadFile] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
-  var fileData = []
+  var fileDataPDF = []
+  var fileDataGPX = []
 
   const updateGpxChanged = index => e => {
     setErrorUploadFile(false)
-    var newsdf = [...fileData]
-    newsdf[index] = e.target.files[0]
-    fileData = newsdf
-    console.log("new ffile", fileData)
+    // var newsdf = [...fileDataGPX]
+    // newsdf[index] = e.target.files[0]
+    // fileDataGPX = newsdf
+    console.log("printing gpx index", index)
+    if (fileDataGPX.length === 0) {
+      fileDataGPX[0] = e.target.files[0]
+    } else {
+      fileDataGPX[index] = e.target.files[0]
+    }
+    console.log("new ffile", fileDataGPX)
   }
   const updatePdfChanged = index => e => {
     setErrorUploadFile(false)
-    var newsdf = [...fileData]
-    newsdf[index] = e.target.files[0]
-    fileData = newsdf
-    console.log("new ffile", fileData)
+    // var newsdf = [...fileData]
+    // newsdf[index] = e.target.files[0]
+    fileDataPDF[0] = e.target.files[0]
+    console.log("new ffile", fileDataPDF)
   }
   function handleChangeDays(event) {
     setDays(event.target.value);
+    var inputs = []
+    inputs = document.forms["saby"].getElementsByTagName("input");
+    console.log("inputs", inputs)
+    for (let index = 1; index < inputs.length; index++) {
+      const element = inputs[index];
+      console.log(element.value)
+      element.value = null
+
+    }
   }
   function handleChangeUserID(event) {
     setErrorUserIDBlank(false)
@@ -54,11 +71,11 @@ function App() {
     setDescription(event.target.value)
   }
 
-  
+
   function handleSubmit(event) {
     event.preventDefault();
     if (userId.trim().length !== 0) {
-      if (fileData.length < days) {
+      if (fileDataGPX.length < days) {
         setErrorUploadFile(true)
       } else {
         uploadFilesToServer()
@@ -72,51 +89,91 @@ function App() {
   }
   function uploadFilesToServer() {
     setShowLoader(true)
-    var formdata = new FormData();
-    fileData.forEach(filee => {
-      console.log(filee)
-      formdata.append("formFiles", filee, filee.name);
+    var fData = [...fileDataPDF, ...fileDataGPX]
+    console.log(fData)
+
+    const formData = new FormData();
+    fData.forEach(f => {
+      console.log(f)
+      formData.append("formFiles", f, f.name);
     });
-
-    var requestOptions = {
-      method: 'POST',
-      body: formdata,
-      redirect: 'follow',
-    };
-
-    var stat = 0
-    //http://api.theperfecttour.ch
-
-    fetch("/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, requestOptions)
-      .then(response => {
-        console.log("response ", response)
-        console.log("response status", response.status)
-        if (response.ok) {
-          stat = response.status
-          console.log("response ok", response)
-          response.text()
-        } else {
-          alert("some thing went wrong!\n Please try again")
-          console.log("response not ok", response)
-          setShowLoader(false)
-        }
-
+    console.log("formdata", formData)
+    // make a POST request to the File Upload API with the FormData object and Rapid API headers
+    axios
+      .post("http://api.theperfecttour.ch/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        },
       })
-      .then(result => {
-        if (stat === 200) {
-          alert("File uploaded successfully")
-          console.log("result", result)
+      .then((response) => {
+        // handle the response
+        console.log(response);
+        if (response.status === 200) {
+          console.log("result", response.data)
           window.location.reload(false);
           setShowLoader(false)
+          alert("File uploaded successfully");
+        } else {
+          setShowLoader(false);
+          alert("Not able to upload Please try again later");
+
         }
-
-
       })
-      .catch(error => {
-        alert("some thing went wrong!\n Please try again")
-        console.log('error', error)
-        setShowLoader(true)
+      .catch((error) => {
+        // handle errors
+        console.log(error);
+        setShowLoader(false)
+        alert("Not able to upload Please try again later")
       });
+
+
+
+
+    // var formdata = new FormData();
+    // fileDataGPX.forEach(filee => {
+    //   console.log(filee)
+    //   formdata.append("formFiles", filee, filee.name);
+    // });
+
+    // var requestOptions = {
+    //   method: 'POST',
+    //   body: formdata,
+    //   redirect: 'follow',
+    // };
+
+    // var stat = 0
+    // //http://api.theperfecttour.ch
+
+    // fetch("/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, requestOptions)
+    //   .then(response => {
+    //     console.log("response ", response)
+    //     console.log("response status", response.status)
+    //     if (response.ok) {
+    //       stat = response.status
+    //       console.log("response ok", response)
+    //       response.text()
+    //     } else {
+    //       alert("some thing went wrong!\n Please try again")
+    //       console.log("response not ok", response)
+    //       setShowLoader(false)
+    //     }
+
+    //   })
+    //   .then(result => {
+    //     if (stat === 200) {
+    //       alert("File uploaded successfully")
+    //       console.log("result", result)
+    //       window.location.reload(false);
+    //       setShowLoader(false)
+    //     }
+
+
+    //   })
+    //   .catch(error => {
+    //     alert("some thing went wrong!\n Please try again")
+    //     console.log('error', error)
+    //     setShowLoader(true)
+    //   });
   }
   return (
     <div style={{ padding: 20, margin: 20, border: '2px solid #FFB32D' }} >
@@ -167,7 +224,7 @@ function App() {
           <text><b>EX:</b>  GPX_1_MainGPX1 / PDF_1_MainPDF1</text>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form name='saby' onSubmit={handleSubmit}>
           {errorUploadFile ? <text style={{ color: "red" }} >Please select files to Upload</text> : null}
           {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
