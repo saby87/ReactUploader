@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './App.css';
 import { Circles } from 'react-loader-spinner'
 
@@ -90,32 +91,50 @@ function App() {
       formData.append("formFiles", f, f.name);
     });
 
-    var requestOptions = {
-      method: 'POST',
-      body: formData,
-      redirect: 'follow',
-    };
+    // var requestOptions = {
+    //   method: 'POST',
+    //   body: formData,
+    //   redirect: 'follow',
+    // };
 
-    //http://api.theperfecttour.ch
+    //"http://api.theperfecttour.ch/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description
 
-    try {
-      var res = await fetch("/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, requestOptions)
-      var rData = await res.text()
-      if (res.status === 200) {
-        alert("File uploaded successfully")
-        console.log("result", rData)
-        window.location.reload(false);
-        setShowLoader(false)
-      } else {
-        alert("some thing went wrong!\n Please try again")
-        console.log("response not ok", res)
-        setShowLoader(false)
-      }
-    } catch (error) {
-      alert("some thing went wrong!\n Please try again")
-      setShowLoader(false)
-      console.log("API stucked in catch", error)
-    }
+    // try {
+    //   var res = await fetch("/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, requestOptions)
+    //   var rData = await res.text()
+    //   if (res.status === 200) {
+    //     alert("File uploaded successfully")
+    //     console.log("result", rData)
+    //     window.location.reload(false);
+    //     setShowLoader(false)
+    //   } else {
+    //     alert("some thing went wrong!\n Please try again")
+    //     console.log("response not ok", res)
+    //     setShowLoader(false)
+    //   }
+    // }
+
+    axios.post("http://api.theperfecttour.ch/api/TMT/uploadTMTFiles?userId=" + userId + "&startLocation=" + startLocation + "&destination=" + destination + "&description=" + description, formData, { // receive two parameter endpoint url ,form data 
+    })
+      .then(res => { // then print response status
+
+        if (res.status === 200) {
+          alert("File uploaded successfully")
+          console.log("result", res.data)
+          window.location.reload(false);
+          setShowLoader(false)
+        } else {
+          alert("some thing went wrong!\n Please try again")
+          console.log("response not ok", res)
+          setShowLoader(false)
+        }
+        console.warn(res);
+      })
+    // .catch (error) {
+    //   alert("some thing went wrong!\n Please try again")
+    //   setShowLoader(false)
+    //   console.log("API stucked in catch", error)
+    // }
   }
   return (
     <div style={{ padding: 20, margin: 20, border: '2px solid #FFB32D' }} >
